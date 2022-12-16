@@ -1,0 +1,2 @@
+openpyxl==3.0.10
+pygerrit2==2.0.15
