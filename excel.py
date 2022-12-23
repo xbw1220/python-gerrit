@@ -1,4 +1,3 @@
-import config
 from gerrit import Gerrit
 from openpyxl.styles import Font
 from openpyxl import load_workbook, Workbook
@@ -13,24 +12,22 @@ def get_total_data(start_time: str, end_time: str, users: dict):
         username = users[chinese_name]
         print(username)
         start_num = 0
-        # print(Gerrit.query_para('yufan0528', '2022-01-01', '2022-11-23', 0))
         query = Gerrit.query_change_para(username, start_time, end_time)
         print("/changes/?q=%s&start=%d" % ("%20".join(query), start_num))
         query_changes = login.get("/changes/?q=%s&start=%d&o=CURRENT_REVISION" % ("%20".join(query), start_num))
         for change in query_changes:
+            # noinspection PyBroadException
             try:
-                if change["_more_changes"] == True:
+                if change["_more_changes"]:
                     start_num += 500
                     query_changes += login.get(
                         "/changes/?q=%s&start=%d&o=CURRENT_REVISION" % ("%20".join(query), start_num))
             except Exception:
                 pass
-                # print(change)
-                # print(query_changes.index(change))
-                # print("id: %s, change_id: %s,revision_id: %s, project:%s, branch: %s" % (
-                #     change["id"], change["change_id"], change["current_revision"], change["project"], change["branch"]))
-                # logging.info("id: %s, change_id: %s, project:%s, branch: %s", change["id"], change["change_id"],
-                #              change["project"], change["branch"])
+                # print(change) print(query_changes.index(change)) print("id: %s, change_id: %s,revision_id: %s,
+                # project:%s, branch: %s" % ( change["id"], change["change_id"], change["current_revision"],
+                # change["project"], change["branch"])) logging.info("id: %s, change_id: %s, project:%s, branch: %s",
+                # change["id"], change["change_id"], change["project"], change["branch"])
 
         insertions, deletions = 0, 0
         for change in query_changes:
@@ -39,27 +36,21 @@ def get_total_data(start_time: str, end_time: str, users: dict):
         change_files_num = 0
         ids_list = []
         for change in query_changes:
-            id_tmp = []
-            id_tmp.append(change["id"])
-            id_tmp.append(change["current_revision"])
+            id_tmp = [change["id"], change["current_revision"]]
             ids_list.append(id_tmp)
         # print(ids_list)
-        for id, revision_id in ids_list:
-            query_change_files = login.get("/changes/%s/revisions/%s/files/" % (id, revision_id))
+        for ID, revision_id in ids_list:
+            query_change_files = login.get("/changes/%s/revisions/%s/files/" % (ID, revision_id))
             query_change_files.pop("/COMMIT_MSG")
+            # noinspection PyBroadException
             try:
                 query_change_files.pop(".gitignore")
             except Exception:
                 pass
             change_files_num += len(query_changes)
             # print(type(query_change_files))
-        owner_data = []
-        owner_data.append(chinese_name)
-        owner_data.append(username)
-        owner_data.append(start_time + '~' + end_time)
-        owner_data.append(len(query_changes))
-        owner_data.append(change_files_num)
-        owner_data.append("+" + str(insertions) + "," + "-" + str(deletions))
+        owner_data = [chinese_name, username, start_time + '~' + end_time, len(query_changes), change_files_num,
+                      "+" + str(insertions) + "," + "-" + str(deletions)]
         # print(owner_data)
         datas.append(owner_data)
     return datas
@@ -137,8 +128,9 @@ def get_user_data(start_time: str, end_time: str, users: dict, excel_name: str):
         # print("/changes/?q=%s&start=%d" % ("%20".join(query), start_num))
         query_changes = login.get("/changes/?q=%s&start=%d&o=CURRENT_REVISION" % ("%20".join(query), start_num))
         for change in query_changes:
+            # noinspection PyBroadException
             try:
-                if change["_more_changes"] == True:
+                if change["_more_changes"]:
                     start_num += 500
                     query_changes += login.get(
                         "/changes/?q=%s&start=%d&o=CURRENT_REVISION" % ("%20".join(query), start_num))
@@ -147,13 +139,12 @@ def get_user_data(start_time: str, end_time: str, users: dict, excel_name: str):
 
         ids_list = []
         for change in query_changes:
-            id_tmp = []
-            id_tmp.append(change["id"])
-            id_tmp.append(change["current_revision"])
+            id_tmp = [change["id"], change["current_revision"]]
             ids_list.append(id_tmp)
-        for id, revision_id in ids_list:
-            query_change_files = login.get("/changes/%s/revisions/%s/files/" % (id, revision_id))
+        for ID, revision_id in ids_list:
+            query_change_files = login.get("/changes/%s/revisions/%s/files/" % (ID, revision_id))
             query_change_files.pop("/COMMIT_MSG")
+            # noinspection PyBroadException
             try:
                 # pass
                 query_change_files.pop(".gitignore")
@@ -168,19 +159,22 @@ def get_user_data(start_time: str, end_time: str, users: dict, excel_name: str):
                 # print('2-' * 100)
                 tmp_list.append(filename)
                 # 是否是二进制
+                # noinspection PyBroadException
                 try:
-                    if query_change_files[filename]['binary'] == True:
+                    if query_change_files[filename]['binary']:
                         tmp_list.append("Yes")
                         break
                 except Exception:
                     tmp_list.append("No")
                 # 是否有新增行
+                # noinspection PyBroadException
                 try:
                     insert_line = query_change_files[filename]['lines_inserted']
                     tmp_list.append('+' + str(insert_line))
                 except Exception:
                     tmp_list.append(None)
                 # 是否有删减行
+                # noinspection PyBroadException
                 try:
                     delete_line = query_change_files[filename]['lines_deleted']
                     tmp_list.append('-' + str(delete_line))
@@ -192,7 +186,6 @@ def get_user_data(start_time: str, end_time: str, users: dict, excel_name: str):
             user_file_list.append(tmp_list)
         # print(user_file_list)
         update_excel_file(chinese_name, user_file_list, excel_name)
-
 
 # start_time = '2022-07-01'
 # end_time = '2022-11-23'

@@ -1,7 +1,7 @@
 import config, excel, time
 
 start_time = '2022-07-01'
-end_time = '2022-11-25'
+end_time = '2022-08-25'
 excel_name = 'Gerrit统计-{0}.xlsx'.format(end_time)
 
 if __name__ == '__main__':
