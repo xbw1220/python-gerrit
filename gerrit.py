@@ -21,4 +21,3 @@ class Gerrit(object):
         query += ["after:{0}".format(star_time)]
         query += ["before:{0}".format(end_time)]
         return query
-
