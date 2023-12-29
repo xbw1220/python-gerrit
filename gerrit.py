@@ -3,9 +3,10 @@ from pygerrit2 import GerritRestAPI, HTTPBasicAuth, HTTPBasicAuthFromNetrc, Anon
 
 class Gerrit(object):
     def __init__(self):
-        self.gerrit_url = 'http://ip:8086'
+        self.auth = None
+        self.gerrit_url = 'http://gerrit.auto-link.com.cn:8086'
         self.username = 'gerrit'
-        self.http_password = 'EZrNP8axZ5cJfyaLP84IdxiTDBDaH3NJYEnrrQzLag'
+        self.http_password = 'cOLkcE21+TElvymOvviT4cVyLJQng0/cBmRhNs5P2w'
 
     def login(self):
         self.auth = HTTPBasicAuth(self.username, self.http_password)
